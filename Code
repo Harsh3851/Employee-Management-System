@@ -1,0 +1,195 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+
+using namespace std;
+
+// Employee class to manage employee details
+class Employee {
+private:
+    int id;
+    string name;
+    string department;
+    float salary;
+
+public:
+    // Constructor
+    Employee() {
+        id = 0;
+        name = "";
+        department = "";
+        salary = 0.0;
+    }
+
+    // Function to set employee data
+    void setData() {
+        cout << "Enter Employee ID: ";
+        cin >> id;
+        cin.ignore();  // To handle input buffer
+        cout << "Enter Employee Name: ";
+        getline(cin, name);
+        cout << "Enter Department: ";
+        getline(cin, department);
+        cout << "Enter Salary: ";
+        cin >> salary;
+    }
+
+    // Function to display employee data
+    void displayData() const {
+        cout << "Employee ID: " << id << endl;
+        cout << "Name: " << name << endl;
+        cout << "Department: " << department << endl;
+        cout << "Salary: " << salary << endl;
+    }
+
+    // Function to retrieve employee ID
+    int getID() const {
+        return id;
+    }
+
+    // Function to save employee data to a file
+    void saveToFile() const {
+        ofstream file;
+        file.open("employees.txt", ios::app);
+        if (file.is_open()) {
+            file << id << " " << name << " " << department << " " << salary << endl;
+            file.close();
+            cout << "Employee record saved successfully." << endl;
+        } else {
+            cout << "Error opening file!" << endl;
+        }
+    }
+
+    // Function to load and display all employee data from the file
+    static void loadFromFile() {
+        ifstream file("employees.txt");
+        if (file.is_open()) {
+            int emp_id;
+            string emp_name, emp_department;
+            float emp_salary;
+
+            while (file >> emp_id >> emp_name >> emp_department >> emp_salary) {
+                cout << "Employee ID: " << emp_id << endl;
+                cout << "Name: " << emp_name << endl;
+                cout << "Department: " << emp_department << endl;
+                cout << "Salary: " << emp_salary << endl;
+                cout << "----------------------------" << endl;
+            }
+            file.close();
+        } else {
+            cout << "No employee records found!" << endl;
+        }
+    }
+
+    // Function to search employee by ID
+    static void searchByID(int search_id) {
+        ifstream file("employees.txt");
+        if (file.is_open()) {
+            int emp_id;
+            string emp_name, emp_department;
+            float emp_salary;
+            bool found = false;
+
+            while (file >> emp_id >> emp_name >> emp_department >> emp_salary) {
+                if (emp_id == search_id) {
+                    cout << "Employee ID: " << emp_id << endl;
+                    cout << "Name: " << emp_name << endl;
+                    cout << "Department: " << emp_department << endl;
+                    cout << "Salary: " << emp_salary << endl;
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                cout << "Employee not found!" << endl;
+            }
+            file.close();
+        } else {
+            cout << "Error opening file!" << endl;
+        }
+    }
+
+    // Function to delete employee by ID
+    static void deleteByID(int delete_id) {
+        ifstream file("employees.txt");
+        ofstream tempFile("temp.txt");
+        if (file.is_open() && tempFile.is_open()) {
+            int emp_id;
+            string emp_name, emp_department;
+            float emp_salary;
+            bool found = false;
+
+            while (file >> emp_id >> emp_name >> emp_department >> emp_salary) {
+                if (emp_id != delete_id) {
+                    tempFile << emp_id << " " << emp_name << " " << emp_department << " " << emp_salary << endl;
+                } else {
+                    found = true;
+                }
+            }
+
+            file.close();
+            tempFile.close();
+
+            remove("employees.txt");
+            rename("temp.txt", "employees.txt");
+
+            if (found) {
+                cout << "Employee deleted successfully." << endl;
+            } else {
+                cout << "Employee not found!" << endl;
+            }
+        } else {
+            cout << "Error opening file!" << endl;
+        }
+    }
+};
+
+// Function to display the menu
+void displayMenu() {
+    cout << "Employee Management System" << endl;
+    cout << "1. Add Employee" << endl;
+    cout << "2. Display All Employees" << endl;
+    cout << "3. Search Employee by ID" << endl;
+    cout << "4. Delete Employee by ID" << endl;
+    cout << "5. Exit" << endl;
+}
+
+int main() {
+    int choice;
+    Employee emp;
+
+    do {
+        displayMenu();
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+        case 1:
+            emp.setData();
+            emp.saveToFile();
+            break;
+        case 2:
+            Employee::loadFromFile();
+            break;
+        case 3:
+            int search_id;
+            cout << "Enter Employee ID to search: ";
+            cin >> search_id;
+            Employee::searchByID(search_id);
+            break;
+        case 4:
+            int delete_id;
+            cout << "Enter Employee ID to delete: ";
+            cin >> delete_id;
+            Employee::deleteByID(delete_id);
+            break;
+        case 5:
+            cout << "Exiting..." << endl;
+            break;
+        default:
+            cout << "Invalid choice! Please try again." << endl;
+        }
+    } while (choice != 5);
+
+    return 0;
+}
